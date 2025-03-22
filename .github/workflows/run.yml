@@ -1,4 +1,4 @@
-name: Cloud check in action
+name: 🌟云签到自动化操作工作流🌟
 
 # 定义触发工作流的事件
 on:
@@ -23,90 +23,133 @@ jobs:
     # 指定作业运行时使用的环境变量
     environment: user
     steps:
-      # 步骤 1: 随机延迟 0 - 300 秒，避免集中请求服务器
-      - name: Random delay 0 - 300 seconds
+      # 步骤 1: 随机延迟 0 - 300 秒，避免集中请求服务器，并显示生成的时间
+      - name: ⏱️ 随机延迟（0 - 300 秒）以分散请求压力
         run: |
+          echo "==================== 开始随机延迟步骤 ===================="
           delay=$((RANDOM % 301))
-          echo "Will delay $delay seconds before proceeding..."
+          current_time=$(date +"%Y-%m-%d %H:%M:%S")
+          echo "当前时间: $current_time，将延迟 $delay 秒后继续..."
           sleep $delay
-          echo "Delay of $delay seconds completed, proceeding with subsequent steps."
+          echo "延迟 $delay 秒完成，继续后续步骤。"
+          echo "==================== 随机延迟步骤结束 ===================="
 
       # 步骤 2: 检出代码到运行环境
-      - name: Check out code
-        uses: actions/checkout@v4
+      - name: 📥 从仓库检出代码至运行环境
+        run: |
+          echo "==================== 开始检出代码步骤 ===================="
+          echo "正在检出代码..."
+          uses: actions/checkout@v4
+          echo "代码检出完成。"
+          echo "==================== 检出代码步骤结束 ===================="
 
       # 步骤 3: 设置 Node.js 环境，使用版本 18 并启用 npm 缓存
-      - name: Setup Node.js environment
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-          cache: npm
+      - name: ⚙️ 配置 Node.js 18 环境并启用 npm 缓存
+        run: |
+          echo "==================== 开始设置 Node.js 环境步骤 ===================="
+          echo "正在设置 Node.js 环境，版本 18，启用 npm 缓存..."
+          uses: actions/setup-node@v4
+          with:
+            node-version: 18
+            cache: npm
+          echo "Node.js 环境设置完成。"
+          echo "==================== 设置 Node.js 环境步骤结束 ===================="
 
       # 步骤 4: 检查是否开启调试模式，如果开启则设置环境变量
-      - name: Check if debug mode is enabled
+      - name: 🐞 检查调试模式并设置环境变量
         if: vars.debug == '1'
         run: |
-          echo "Debug mode is enabled. Setting environment variable CLOUD189_VERBOSE=1."
+          echo "==================== 开始检查调试模式步骤 ===================="
+          echo "调试模式已启用。设置环境变量 CLOUD189_VERBOSE=1。"
           echo "CLOUD189_VERBOSE=1" >> $GITHUB_ENV
+          echo "调试模式检查及设置完成。"
+          echo "==================== 检查调试模式步骤结束 ===================="
 
       # 步骤 5: 检查是否启用缓存 Token，如果启用则设置环境变量
-      - name: Check if cache token is enabled
+      - name: 💾 检查 Token 缓存启用情况并设置环境变量
         if: vars.cacheToken == '1'
         run: |
-          echo "Cache token is enabled. Setting environment variable CACHE_TOKEN=1."
+          echo "==================== 开始检查缓存 Token 步骤 ===================="
+          echo "缓存 Token 已启用。设置环境变量 CACHE_TOKEN=1。"
           echo "CACHE_TOKEN=1" >> $GITHUB_ENV
+          echo "缓存 Token 检查及设置完成。"
+          echo "==================== 检查缓存 Token 步骤结束 ===================="
 
       # 步骤 6: 恢复或保存缓存的 Token 目录
-      - name: Cache token directory
+      - name: 💿 恢复或保存 Token 缓存目录
         if: vars.cacheToken == '1'
-        uses: actions/cache@v4
-        with:
-          path: .token
-          key: ${{ runner.os }}-cache-token-${{ hashFiles('.token/*.json') }}
-          restore-keys: ${{ runner.os }}-cache-token-
+        run: |
+          echo "==================== 开始缓存 Token 目录步骤 ===================="
+          echo "正在恢复或保存缓存的 Token 目录..."
+          uses: actions/cache@v4
+          with:
+            path: .token
+            key: ${{ runner.os }}-cache-token-${{ hashFiles('.token/*.json') }}
+            restore-keys: ${{ runner.os }}-cache-token-
+          echo "缓存 Token 目录操作完成。"
+          echo "==================== 缓存 Token 目录步骤结束 ===================="
 
       # 步骤 7: 初始化机密信息，将仓库的 secrets 转换为环境变量
-      - name: Initialize secrets
-        uses: shine1594/secrets-to-env-action@master
-        with:
-          secrets: ${{ toJSON(secrets) }}
-          secrets_env: production
-          prefix_prod: ""
-          file_name_prod: .env
+      - name: 🔑 初始化机密信息并转换为环境变量
+        run: |
+          echo "==================== 开始初始化机密信息步骤 ===================="
+          echo "正在初始化机密信息..."
+          uses: shine1594/secrets-to-env-action@master
+          with:
+            secrets: ${{ toJSON(secrets) }}
+            secrets_env: production
+            prefix_prod: ""
+            file_name_prod: .env
+          echo "机密信息初始化完成。"
+          echo "==================== 初始化机密信息步骤结束 ===================="
 
       # 步骤 8: 安装项目依赖
-      - name: Install project dependencies
+      - name: 📦 安装项目所需依赖
         run: |
-          echo "Starting to install project dependencies..."
+          echo "==================== 开始安装项目依赖步骤 ===================="
+          echo "开始安装项目依赖..."
           npm install
+          echo "项目依赖安装完成。"
+          echo "==================== 安装项目依赖步骤结束 ===================="
 
       # 步骤 9: 运行项目，最多重试 3 次，每次超时时间为 30 分钟
-      - name: Run project
+      - name: ▶️ 运行项目（最多重试 3 次，每次 30 分钟）
         uses: nick-fields/retry@master
         with:
           timeout_minutes: 30
           max_attempts: 3
           command: |
-            echo "Starting to run the project, with a maximum of 3 retries and a timeout of 30 minutes per attempt..."
+            echo "==================== 开始运行项目步骤 ===================="
+            echo "开始运行项目，最多重试 3 次，每次尝试超时时间为 30 分钟..."
             npm start
+            echo "项目运行完成。"
+            echo "==================== 运行项目步骤结束 ===================="
 
       # 步骤 10: 如果是定时任务触发，则进行一次空提交并推送代码
-      - name: Keep the workflow running
+      - name: ⏰ 定时任务触发 - 空提交并推送代码以保持工作流运行
         if: github.event_name == 'schedule'
         run: |
-          echo "This workflow was triggered by a scheduled task. Making an empty commit and pushing the code..."
+          echo "==================== 开始保持工作流运行步骤 ===================="
+          echo "此工作流由定时任务触发。进行一次空提交并推送代码..."
           git config --local user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
           git config --local user.name "${{ github.actor }}"
           git remote set-url origin https://${{ github.actor }}:${{ github.token }}@github.com/${{ github.repository }}
           git pull --rebase --autostash
-          git commit --allow-empty -m "Keep Running..."
+          git commit --allow-empty -m "持续运行..."
           git push
+          echo "空提交并推送代码完成。"
+          echo "==================== 保持工作流运行步骤结束 ===================="
 
       # 步骤 11: 删除旧的工作流运行记录，保留最新的 50 条记录
-      - name: Delete old workflow runs
-        uses: Mattraks/delete-workflow-runs@main
-        with:
-          token: ${{ github.token }}
-          repository: ${{ github.repository }}
-          retain_days: 0
-          keep_minimum_runs: 50    
+      - name: 🗑️ 删除旧工作流记录，保留最新 50 条
+        run: |
+          echo "==================== 开始删除旧工作流记录步骤 ===================="
+          echo "正在删除旧的工作流运行记录，保留最新的 50 条记录..."
+          uses: Mattraks/delete-workflow-runs@main
+          with:
+            token: ${{ github.token }}
+            repository: ${{ github.repository }}
+            retain_days: 0
+            keep_minimum_runs: 50
+          echo "旧工作流运行记录删除完成。"
+          echo "==================== 删除旧工作流记录步骤结束 ===================="    
